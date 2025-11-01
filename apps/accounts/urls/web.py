@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from apps.accounts import views
 
 urlpatterns = [
     path('turmas/', views.turmas, name='aluno_turmas'),
