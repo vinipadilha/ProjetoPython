@@ -1,9 +1,65 @@
-<h1>Recursos</h1>
-<ul>
-  {% for r in recursos %}
-    <li>{{ r.rec_nome }} ({{ r.rec_tipo }})</li>
-  {% empty %}
-    <li>Nenhum recurso disponível</li>
-  {% endfor %}
-</ul>
-<a href="{% url 'aluno_turmas' %}">Voltar</a>
+{% extends 'base.html' %}
+
+{% block title %}Recursos{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Recursos da Turma</h1>
+            {% if turma %}
+            <p class="text-gray-600">{{ turma.tru_nome }}</p>
+            {% endif %}
+        </div>
+        <a href="{% url 'aluno_turmas' %}" 
+           class="inline-flex items-center px-4 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 transition-colors duration-200">
+            <svg class="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Voltar
+        </a>
+    </div>
+</div>
+
+{% if recursos %}
+<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {% for r in recursos %}
+    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200 p-6">
+        <div class="flex items-start justify-between mb-4">
+            <div class="flex-1">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">{{ r.rec_nome }}</h2>
+                {% if r.rec_descricao %}
+                <p class="text-sm text-gray-600 mb-4">{{ r.rec_descricao|truncatewords:15 }}</p>
+                {% endif %}
+            </div>
+            <span class="ml-4 px-3 py-1 text-xs font-medium rounded-full {% if r.rec_tipo == 'video' %}bg-red-100 text-red-800{% elif r.rec_tipo == 'pdf' %}bg-blue-100 text-blue-800{% else %}bg-green-100 text-green-800{% endif %}">
+                {{ r.rec_tipo|upper }}
+            </span>
+        </div>
+        
+        <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+            <div class="flex items-center space-x-2">
+                {% if r.rec_acesso_previo %}
+                <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">Acesso Prévio</span>
+                {% endif %}
+                {% if r.rec_draft %}
+                <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">Rascunho</span>
+                {% endif %}
+            </div>
+            <button class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors duration-200">
+                Acessar
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
+    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+    </svg>
+    <h3 class="mt-4 text-lg font-medium text-gray-900">Nenhum recurso disponível</h3>
+    <p class="mt-2 text-sm text-gray-500">Não há recursos disponíveis para esta turma no momento.</p>
+</div>
+{% endif %}
+{% endblock %}
