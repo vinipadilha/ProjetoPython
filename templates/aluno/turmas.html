@@ -1,0 +1,8 @@
+<h1>Minhas turmas</h1>
+<ul>
+  {% for t in turmas %}
+    <li><a href="{% url 'aluno_recursos' turma_id=t.tru_id %}">{{ t.tru_nome }}</a></li>
+  {% empty %}
+    <li>Nenhuma turma encontrada</li>
+  {% endfor %}
+</ul>

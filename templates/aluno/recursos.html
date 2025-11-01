@@ -1,0 +1,9 @@
+<h1>Recursos</h1>
+<ul>
+  {% for r in recursos %}
+    <li>{{ r.rec_nome }} ({{ r.rec_tipo }})</li>
+  {% empty %}
+    <li>Nenhum recurso disponível</li>
+  {% endfor %}
+</ul>
+<a href="{% url 'aluno_turmas' %}">Voltar</a>
