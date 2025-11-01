@@ -8,6 +8,7 @@ urlpatterns = [
     path('turmas/', include('apps.classesapp.urls.web')),
     path('recursos/', include('apps.resourcesapp.urls.web')),
     path('matriculas/', include('apps.enrollments.urls.web')),
-    path('aluno/', include('apps.accounts.urls.web'))
+    path('aluno/', include('apps.accounts.urls.web')),
+    path('api/', include('apps.accounts.urls.api'))
 
 ]
