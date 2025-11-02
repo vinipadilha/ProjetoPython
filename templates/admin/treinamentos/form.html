@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Treinamento{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ action }} Treinamento</h1>
+    <p class="text-gray-600">Preencha os dados do treinamento abaixo</p>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+        <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg flex items-center">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="font-medium">{{ message }}</p>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+<div class="bg-white rounded-lg shadow-md p-6">
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <div>
+            <label for="tre_nome" class="block text-sm font-medium text-gray-700 mb-2">
+                Nome do Treinamento <span class="text-red-500">*</span>
+            </label>
+            <input 
+                type="text" 
+                name="tre_nome" 
+                id="tre_nome"
+                value="{% if treinamento %}{{ treinamento.tre_nome }}{% endif %}"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+                placeholder="Digite o nome do treinamento"
+            >
+        </div>
+
+        <div>
+            <label for="tre_descricao" class="block text-sm font-medium text-gray-700 mb-2">
+                Descrição
+            </label>
+            <textarea 
+                name="tre_descricao" 
+                id="tre_descricao"
+                rows="6"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 resize-none"
+                placeholder="Digite a descrição do treinamento (opcional)"
+            >{% if treinamento %}{{ treinamento.tre_descricao }}{% endif %}</textarea>
+        </div>
+
+        <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200">
+            <a href="{% url 'admin_treinamentos_listar' %}" 
+               class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200">
+                Cancelar
+            </a>
+            <button 
+                type="submit" 
+                class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+                {% if treinamento %}Atualizar{% else %}Criar{% endif %} Treinamento
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
