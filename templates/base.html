@@ -13,24 +13,29 @@
         </div>
         
         <nav class="flex-1 p-4 space-y-1">
-            <a href="/painel/" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors duration-200">
-                Painel
+            {% if request.user.is_staff or request.user.is_superuser %}
+            {% with current_path=request.path %}
+            <a href="/admin/" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if current_path == '/admin/' or current_path == '/admin' %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                Dashboard
             </a>
-            <a href="/admin/accounts/aluno/" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors duration-200">
-                Alunos
-            </a>
-            <a href="/admin/trainings/treinamento/" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors duration-200">
+            <a href="/admin/trainings/treinamento/" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if 'trainings/treinamento' in current_path %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                 Treinamentos
             </a>
-            <a href="/admin/trainings/turma/" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors duration-200">
+            <a href="/admin/trainings/turma/" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if 'trainings/turma' in current_path %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                 Turmas
             </a>
-            <a href="/admin/resourcesapp/recurso/" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors duration-200">
+            <a href="/admin/resourcesapp/recurso/" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if 'resourcesapp/recurso' in current_path %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                 Recursos
             </a>
-            <a href="/admin/enrollments/matricula/" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors duration-200">
-                Matrículas
+            <a href="/admin/accounts/aluno/" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if 'accounts/aluno' in current_path %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                Alunos
             </a>
+            {% endwith %}
+            {% else %}
+            <a href="{% url 'aluno_turmas' %}" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if '/aluno/turmas' in request.path %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                Minhas Turmas
+            </a>
+            {% endif %}
         </nav>
         
         <div class="p-4 border-t border-gray-200">
