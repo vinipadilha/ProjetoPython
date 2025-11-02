@@ -13,7 +13,7 @@ class Matricula(models.Model):
     aluno = models.ForeignKey(
         Aluno,
         models.DO_NOTHING,
-        db_column='matAluId',
+        db_column='matUsuId',
         related_name='matriculas'
     )
     mat_cadastrado_em = models.DateTimeField(db_column='matCadastradoEm')
