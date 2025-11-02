@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Turma{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ action }} Turma</h1>
+    <p class="text-gray-600">Preencha os dados da turma abaixo</p>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+        <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg flex items-center">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="font-medium">{{ message }}</p>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+<div class="bg-white rounded-lg shadow-md p-6">
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <div>
+            <label for="tru_nome" class="block text-sm font-medium text-gray-700 mb-2">
+                Nome da Turma <span class="text-red-500">*</span>
+            </label>
+            <input 
+                type="text" 
+                name="tru_nome" 
+                id="tru_nome"
+                value="{% if turma %}{{ turma.tru_nome }}{% endif %}"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+                placeholder="Digite o nome da turma"
+            >
+        </div>
+
+        <div>
+            <label for="treinamento" class="block text-sm font-medium text-gray-700 mb-2">
+                Treinamento <span class="text-red-500">*</span>
+            </label>
+            <select 
+                name="treinamento" 
+                id="treinamento"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-white appearance-none cursor-pointer hover:border-gray-400"
+                style="background-image: url('data:image/svg+xml;utf8,<svg fill=%27%23666%27 viewBox=%270 0 20 20%27 xmlns=%27http://www.w3.org/2000/svg%27><path d=%27M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z%27/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;"
+            >
+                <option value="">Selecione um treinamento</option>
+                {% for treinamento in treinamentos %}
+                <option value="{{ treinamento.tre_id }}" {% if turma and turma.treinamento.tre_id == treinamento.tre_id %}selected{% endif %}>
+                    {{ treinamento.tre_nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="tru_data_inicio" class="block text-sm font-medium text-gray-700 mb-2">
+                    Data de Início <span class="text-red-500">*</span>
+                </label>
+                <input 
+                    type="date" 
+                    name="tru_data_inicio" 
+                    id="tru_data_inicio"
+                    value="{% if turma %}{{ turma.tru_data_inicio|date:'Y-m-d' }}{% endif %}"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 cursor-pointer hover:border-gray-400"
+                    style="background-image: url('data:image/svg+xml;utf8,<svg fill=%27%23666%27 viewBox=%270 0 20 20%27 xmlns=%27http://www.w3.org/2000/svg%27><path fill-rule=%27evenodd%27 d=%27M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z%27 clip-rule=%27evenodd%27/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em; padding-right: 2.5rem;"
+                >
+            </div>
+
+            <div>
+                <label for="tru_data_conclusao" class="block text-sm font-medium text-gray-700 mb-2">
+                    Data de Conclusão
+                </label>
+                <input 
+                    type="date" 
+                    name="tru_data_conclusao" 
+                    id="tru_data_conclusao"
+                    value="{% if turma and turma.tru_data_conclusao %}{{ turma.tru_data_conclusao|date:'Y-m-d' }}{% endif %}"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 cursor-pointer hover:border-gray-400"
+                    style="background-image: url('data:image/svg+xml;utf8,<svg fill=%27%23666%27 viewBox=%270 0 20 20%27 xmlns=%27http://www.w3.org/2000/svg%27><path fill-rule=%27evenodd%27 d=%27M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z%27 clip-rule=%27evenodd%27/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em; padding-right: 2.5rem;"
+                >
+            </div>
+        </div>
+
+        <div>
+            <label for="tru_link_acesso" class="block text-sm font-medium text-gray-700 mb-2">
+                Link de Acesso
+            </label>
+            <input 
+                type="url" 
+                name="tru_link_acesso" 
+                id="tru_link_acesso"
+                value="{% if turma %}{{ turma.tru_link_acesso }}{% endif %}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+                placeholder="https://exemplo.com/acesso"
+            >
+        </div>
+
+        <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200">
+            <a href="{% url 'admin_turmas_listar' %}" 
+               class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200">
+                Cancelar
+            </a>
+            <button 
+                type="submit" 
+                class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+                {% if turma %}Atualizar{% else %}Criar{% endif %} Turma
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
