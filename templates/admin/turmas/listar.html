@@ -77,11 +77,11 @@
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{ turma.tru_data_inicio|date:"d/m/Y H:i" }}
+                    {{ turma.tru_data_inicio|date:"d/m/Y" }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {% if turma.tru_data_conclusao %}
-                        {{ turma.tru_data_conclusao|date:"d/m/Y H:i" }}
+                        {{ turma.tru_data_conclusao|date:"d/m/Y" }}
                     {% else %}
                         <span class="text-gray-400">Não definida</span>
                     {% endif %}

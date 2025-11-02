@@ -3,11 +3,22 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.utils import timezone
 from apps.trainings.models import Treinamento, Turma
+from apps.accounts.services.current_user import get_usuario_from_request
+from apps.accounts.roles import ROLE_ADMIN
 
 def is_admin(user):
-    if hasattr(user, 'is_admin'):
-        return user.is_admin
-    return user.is_staff or user.is_superuser
+    # Verifica se é uma instância de Usuario do nosso modelo customizado
+    try:
+        from apps.accounts.models import Usuario
+        if isinstance(user, Usuario):
+            return user.perfil_id == ROLE_ADMIN
+        # Se não for Usuario, tenta verificar propriedades padrão
+        if hasattr(user, 'is_admin'):
+            return user.is_admin
+        return getattr(user, 'is_staff', False) or getattr(user, 'is_superuser', False)
+    except Exception:
+        # Fallback seguro
+        return getattr(user, 'is_staff', False) or getattr(user, 'is_superuser', False)
 
 @login_required
 @user_passes_test(is_admin)
@@ -76,8 +87,12 @@ def excluir_treinamento(request, tre_id):
     return redirect('admin_treinamentos_listar')
 
 @login_required
-@user_passes_test(is_admin)
 def listar_turmas(request):
+    # Verifica se é admin usando o context processor
+    usuario = get_usuario_from_request(request)
+    if not usuario or usuario.perfil_id != ROLE_ADMIN:
+        return redirect('/aluno/turmas/')
+    
     turmas = Turma.objects.select_related('treinamento').all().order_by('-tru_data_inicio')
     return render(request, 'admin/turmas/listar.html', {
         'turmas': turmas

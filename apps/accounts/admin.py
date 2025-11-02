@@ -1,6 +1,21 @@
+from django import forms
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from .models import Perfil, Usuario, Aluno
+from django.contrib.auth.hashers import make_password
+from django.db import connection
+from django.utils import timezone
+from .models import Perfil, Usuario
+
+class UsuarioAdminForm(forms.ModelForm):
+    password = forms.CharField(
+        label='Senha',
+        widget=forms.PasswordInput(),
+        required=False,
+        help_text='Deixe em branco para não alterar a senha.'
+    )
+    
+    class Meta:
+        model = Usuario
+        fields = '__all__'
 
 @admin.register(Perfil)
 class PerfilAdmin(admin.ModelAdmin):
@@ -9,28 +24,44 @@ class PerfilAdmin(admin.ModelAdmin):
     ordering = ('pef_nome',)
 
 @admin.register(Usuario)
-class UsuarioAdmin(UserAdmin):
-    list_display = ('usu_nome', 'usu_email', 'perfil', 'usu_cadastrado_em', 'is_active')
-    list_filter = ('perfil', 'is_active', 'is_staff', 'is_superuser')
+class UsuarioAdmin(admin.ModelAdmin):
+    form = UsuarioAdminForm
+    list_display = ('usu_nome', 'usu_email', 'perfil', 'usu_cadastrado_em')
+    list_filter = ('perfil',)
     search_fields = ('usu_nome', 'usu_email')
     ordering = ('usu_nome',)
     
-    fieldsets = (
-        (None, {'fields': ('usu_email', 'password')}),
-        ('Informações Pessoais', {'fields': ('usu_nome', 'usu_telefone', 'perfil')}),
-        ('Permissões', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Datas Importantes', {'fields': ('usu_cadastrado_em',)}),
-    )
+    fields = ('usu_email', 'usu_nome', 'usu_telefone', 'perfil', 'password', 'usu_cadastrado_em')
+    readonly_fields = ('usu_cadastrado_em',)
     
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('usu_email', 'usu_nome', 'perfil', 'password'),
-        }),
-    )
-
-@admin.register(Aluno)
-class AlunoAdmin(admin.ModelAdmin):
-    list_display = ('alu_id', 'alu_nome', 'alu_email', 'alu_telefone', 'alu_cadastrado_em')
-    search_fields = ('alu_nome', 'alu_email')
-    ordering = ('alu_nome',)
+    def save_model(self, request, obj, form, change):
+        password = form.cleaned_data.get('password')
+        
+        if change:
+            senha_atual = password
+            
+            with connection.cursor() as cursor:
+                if senha_atual and senha_atual.strip() != '':
+                    senha_hasheada = make_password(senha_atual)
+                    cursor.execute("""
+                        UPDATE usuario 
+                        SET usuEmail = %s, usuNome = %s, usuTelefone = %s, usuPefId = %s, usuSenha = %s
+                        WHERE usuId = %s
+                    """, [obj.usu_email, obj.usu_nome, obj.usu_telefone or None, obj.perfil_id, senha_hasheada, obj.usu_id])
+                else:
+                    cursor.execute("""
+                        UPDATE usuario 
+                        SET usuEmail = %s, usuNome = %s, usuTelefone = %s, usuPefId = %s
+                        WHERE usuId = %s
+                    """, [obj.usu_email, obj.usu_nome, obj.usu_telefone or None, obj.perfil_id, obj.usu_id])
+        else:
+            if not password:
+                raise forms.ValidationError('A senha é obrigatória para novos usuários.')
+            senha_hasheada = make_password(password)
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO usuario (usuPefId, usuNome, usuEmail, usuTelefone, usuSenha, usuCadastradoEm, is_active, is_staff, is_superuser)
+                    VALUES (%s, %s, %s, %s, %s, %s, 1, 0, 0)
+                """, [obj.perfil_id, obj.usu_nome, obj.usu_email, obj.usu_telefone or None, senha_hasheada, timezone.now()])
+                cursor.execute("SELECT LAST_INSERT_ID()")
+                obj.usu_id = cursor.fetchone()[0]

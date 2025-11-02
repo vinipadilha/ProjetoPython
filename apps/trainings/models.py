@@ -26,8 +26,8 @@ class Turma(models.Model):
         related_name='turmas'
     )
     tru_nome = models.CharField(db_column='truNome', max_length=160)
-    tru_data_inicio = models.DateTimeField(db_column='truDataInicio')
-    tru_data_conclusao = models.DateTimeField(db_column='truDataConclusao', blank=True, null=True)
+    tru_data_inicio = models.DateField(db_column='truDataInicio')
+    tru_data_conclusao = models.DateField(db_column='truDataConclusao', blank=True, null=True)
     tru_link_acesso = models.CharField(db_column='truLinkAcesso', max_length=255, blank=True, null=True)
     tru_cadastrado_em = models.DateTimeField(db_column='truCadastradoEm')
 

@@ -14,23 +14,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Aluno',
-            fields=[
-                ('alu_id', models.AutoField(db_column='aluId', primary_key=True, serialize=False)),
-                ('alu_nome', models.CharField(db_column='aluNome', max_length=160)),
-                ('alu_email', models.CharField(db_column='aluEmail', max_length=190, unique=True)),
-                ('alu_telefone', models.CharField(blank=True, db_column='aluTelefone', max_length=32, null=True)),
-                ('alu_cadastrado_em', models.DateTimeField(db_column='aluCadastradoEm')),
-            ],
-            options={
-                'verbose_name': 'Aluno',
-                'verbose_name_plural': 'Alunos',
-                'db_table': 'aluno',
-                'ordering': ['alu_nome'],
-                'managed': False,
-            },
-        ),
-        migrations.CreateModel(
             name='Perfil',
             fields=[
                 ('pef_id', models.AutoField(db_column='pefId', primary_key=True, serialize=False)),
@@ -42,6 +25,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Perfis',
                 'db_table': 'perfil',
                 'ordering': ['pef_nome'],
+                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -66,6 +50,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Usuários',
                 'db_table': 'usuario',
                 'ordering': ['usu_nome'],
+                'managed': False,
             },
         ),
     ]
