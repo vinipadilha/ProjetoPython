@@ -1,4 +1,5 @@
 from django.db import models
+from .roles import ROLE_ADMIN, ROLE_STUDENT
 
 class Perfil(models.Model):
     pef_id = models.AutoField(db_column='pefId', primary_key=True)
@@ -35,8 +36,8 @@ class Usuario(models.Model):
 
     @property
     def is_admin(self):
-        return (self.perfil and self.perfil.pef_nome.upper() == 'ADMIN')
-        
+        return self.perfil_id == ROLE_ADMIN
+
     @property
     def is_student(self):
-        return self.perfil and self.perfil.pef_nome.upper() == 'ESTUDANTE'
+        return self.perfil_id == ROLE_STUDENT
