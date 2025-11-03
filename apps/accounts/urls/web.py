@@ -5,6 +5,10 @@ from apps.accounts.views import web
 urlpatterns = [
     path('pos-login/', web.pos_login, name='pos_login'),
     path('dashboard/', web.dashboard, name='dashboard'),
+    path('usuarios/', web.listar_usuarios, name='admin_usuarios_listar'),
+    path('usuarios/criar/', web.criar_usuario, name='admin_usuarios_criar'),
+    path('usuarios/<int:usu_id>/editar/', web.editar_usuario, name='admin_usuarios_editar'),
+    path('usuarios/<int:usu_id>/excluir/', web.excluir_usuario, name='admin_usuarios_excluir'),
 ]
 
 # URLs para alunos (com prefixo /aluno/)

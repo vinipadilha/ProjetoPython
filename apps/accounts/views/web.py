@@ -1,12 +1,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.hashers import make_password
+from django.db import connection
+from django.utils import timezone
 from apps.trainings.models import Turma, Treinamento
 from apps.resourcesapp.models import Recurso
 from apps.resourcesapp.services.access_rules import recursos_visiveis
-from apps.accounts.models import Usuario
+from apps.accounts.models import Usuario, Perfil
 from apps.enrollments.models import Matricula
 from apps.accounts.services.current_user import get_usuario_from_request
-from apps.accounts.roles import ROLE_ADMIN
+from apps.accounts.roles import ROLE_ADMIN, ROLE_STUDENT
 
 @login_required
 def pos_login(request):
@@ -35,6 +39,152 @@ def dashboard(request):
     }
     
     return render(request, 'admin/dashboard.html', {'usuario': u, 'stats': stats})
+
+@login_required
+def listar_usuarios(request):
+    """Lista todos os usuários (admin)"""
+    usuario = get_usuario_from_request(request)
+    if not usuario or usuario.perfil_id != ROLE_ADMIN:
+        return redirect('/aluno/turmas/')
+    
+    usuarios = Usuario.objects.select_related('perfil').all().order_by('usu_nome')
+    
+    return render(request, 'admin/usuarios/listar.html', {
+        'usuarios': usuarios
+    })
+
+@login_required
+def criar_usuario(request):
+    """Cria um novo usuário"""
+    usuario = get_usuario_from_request(request)
+    if not usuario or usuario.perfil_id != ROLE_ADMIN:
+        return redirect('/aluno/turmas/')
+    
+    perfis = Perfil.objects.all().order_by('pef_nome')
+    
+    if request.method == 'POST':
+        nome = request.POST.get('usu_nome')
+        email = request.POST.get('usu_email')
+        telefone = request.POST.get('usu_telefone', '')
+        perfil_id = request.POST.get('perfil')
+        senha = request.POST.get('senha')
+        confirmar_senha = request.POST.get('confirmar_senha')
+        
+        # Validações
+        if not nome or not email or not perfil_id or not senha:
+            messages.error(request, 'Nome, email, perfil e senha são obrigatórios.')
+        elif senha != confirmar_senha:
+            messages.error(request, 'As senhas não coincidem.')
+        elif len(senha) < 6:
+            messages.error(request, 'A senha deve ter pelo menos 6 caracteres.')
+        else:
+            # Verifica se o email já existe
+            if Usuario.objects.filter(usu_email=email).exists():
+                messages.error(request, 'Este email já está cadastrado.')
+            else:
+                try:
+                    perfil = get_object_or_404(Perfil, pk=perfil_id)
+                    senha_hasheada = make_password(senha)
+                    
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            INSERT INTO usuario (usuPefId, usuNome, usuEmail, usuTelefone, usuSenha, usuCadastradoEm, is_active, is_staff, is_superuser)
+                            VALUES (%s, %s, %s, %s, %s, %s, 1, 0, 0)
+                        """, [perfil_id, nome, email, telefone if telefone else None, senha_hasheada, timezone.now()])
+                    
+                    messages.success(request, 'Usuário criado com sucesso!')
+                    return redirect('admin_usuarios_listar')
+                except Exception as e:
+                    messages.error(request, f'Erro ao criar usuário: {str(e)}')
+    
+    return render(request, 'admin/usuarios/form.html', {
+        'usuario': None,
+        'perfis': perfis,
+        'action': 'Criar'
+    })
+
+@login_required
+def editar_usuario(request, usu_id):
+    """Edita um usuário existente"""
+    usuario = get_usuario_from_request(request)
+    if not usuario or usuario.perfil_id != ROLE_ADMIN:
+        return redirect('/aluno/turmas/')
+    
+    usuario_obj = get_object_or_404(Usuario, pk=usu_id)
+    perfis = Perfil.objects.all().order_by('pef_nome')
+    
+    if request.method == 'POST':
+        nome = request.POST.get('usu_nome')
+        email = request.POST.get('usu_email')
+        telefone = request.POST.get('usu_telefone', '')
+        perfil_id = request.POST.get('perfil')
+        senha = request.POST.get('senha')
+        confirmar_senha = request.POST.get('confirmar_senha')
+        
+        # Validações
+        if not nome or not email or not perfil_id:
+            messages.error(request, 'Nome, email e perfil são obrigatórios.')
+        elif senha and senha != confirmar_senha:
+            messages.error(request, 'As senhas não coincidem.')
+        elif senha and len(senha) < 6:
+            messages.error(request, 'A senha deve ter pelo menos 6 caracteres.')
+        else:
+            # Verifica se o email já existe (exceto o próprio usuário)
+            if Usuario.objects.filter(usu_email=email).exclude(pk=usu_id).exists():
+                messages.error(request, 'Este email já está cadastrado.')
+            else:
+                try:
+                    perfil = get_object_or_404(Perfil, pk=perfil_id)
+                    
+                    with connection.cursor() as cursor:
+                        if senha and senha.strip():
+                            senha_hasheada = make_password(senha)
+                            cursor.execute("""
+                                UPDATE usuario 
+                                SET usuEmail = %s, usuNome = %s, usuTelefone = %s, usuPefId = %s, usuSenha = %s
+                                WHERE usuId = %s
+                            """, [email, nome, telefone if telefone else None, perfil_id, senha_hasheada, usu_id])
+                        else:
+                            cursor.execute("""
+                                UPDATE usuario 
+                                SET usuEmail = %s, usuNome = %s, usuTelefone = %s, usuPefId = %s
+                                WHERE usuId = %s
+                            """, [email, nome, telefone if telefone else None, perfil_id, usu_id])
+                    
+                    messages.success(request, 'Usuário atualizado com sucesso!')
+                    return redirect('admin_usuarios_listar')
+                except Exception as e:
+                    messages.error(request, f'Erro ao atualizar usuário: {str(e)}')
+    
+    return render(request, 'admin/usuarios/form.html', {
+        'usuario': usuario_obj,
+        'perfis': perfis,
+        'action': 'Editar'
+    })
+
+@login_required
+def excluir_usuario(request, usu_id):
+    """Exclui um usuário"""
+    usuario = get_usuario_from_request(request)
+    if not usuario or usuario.perfil_id != ROLE_ADMIN:
+        return redirect('/aluno/turmas/')
+    
+    usuario_obj = get_object_or_404(Usuario, pk=usu_id)
+    
+    if request.method == 'POST':
+        try:
+            # Não permite excluir o próprio usuário
+            if usuario_obj.usu_id == usuario.usu_id:
+                messages.error(request, 'Você não pode excluir seu próprio usuário.')
+            else:
+                with connection.cursor() as cursor:
+                    cursor.execute("DELETE FROM usuario WHERE usuId = %s", [usu_id])
+                messages.success(request, 'Usuário excluído com sucesso!')
+        except Exception as e:
+            messages.error(request, f'Erro ao excluir usuário: {str(e)}')
+        return redirect('admin_usuarios_listar')
+    
+    return redirect('admin_usuarios_listar')
 
 @login_required
 def turmas(request):
