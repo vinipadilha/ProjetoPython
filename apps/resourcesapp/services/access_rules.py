@@ -13,9 +13,9 @@ def recursos_visiveis(turma, recursos_iterable):
         data_inicio = data_inicio
     
     if data_inicio > agora:
-        # Antes do início da turma: só recursos com acesso prévio
+        # Antes do início da turma: só recursos com acesso prévio E que não estão em draft
         for r in recursos_iterable:
-            if getattr(r, 'rec_acesso_previo', False):
+            if getattr(r, 'rec_acesso_previo', False) and not getattr(r, 'rec_draft', False):
                 visiveis.append(r)
     else:
         # Após o início da turma: recursos que não estão em draft

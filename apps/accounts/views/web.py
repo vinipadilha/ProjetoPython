@@ -199,7 +199,34 @@ def turmas(request):
 
 @login_required
 def turma_recursos(request, turma_id):
-    turma = get_object_or_404(Turma, pk=turma_id)
+    usuario = get_usuario_from_request(request)
+    if not usuario:
+        return redirect('/login/')
+    
+    turma = get_object_or_404(Turma.objects.select_related('treinamento'), pk=turma_id)
+    
+    # Verifica se o aluno está matriculado nesta turma
+    if not Matricula.objects.filter(turma_id=turma_id, usuario_id=usuario.usu_id).exists():
+        messages.error(request, 'Você não está matriculado nesta turma.')
+        return redirect('aluno_turmas')
+    
     recursos_qs = Recurso.objects.filter(turma_id=turma_id).order_by('rec_nome')
     recursos = recursos_visiveis(turma, list(recursos_qs))
-    return render(request, 'aluno/recursos.html', {'turma': turma, 'recursos': recursos})
+    
+    # Determina o status da turma para exibir mensagem adequada
+    from datetime import date
+    agora = timezone.now().date()
+    data_inicio = turma.tru_data_inicio
+    if hasattr(data_inicio, 'date'):
+        data_inicio = data_inicio.date()
+    elif isinstance(data_inicio, date):
+        data_inicio = data_inicio
+    
+    turma_iniciada = data_inicio <= agora
+    
+    return render(request, 'aluno/recursos.html', {
+        'turma': turma, 
+        'recursos': recursos,
+        'turma_iniciada': turma_iniciada,
+        'data_inicio': data_inicio
+    })
