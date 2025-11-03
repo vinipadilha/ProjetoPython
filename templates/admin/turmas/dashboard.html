@@ -145,18 +145,17 @@
                         <p class="text-xs text-gray-500">{{ aluno.usu_telefone }}</p>
                         {% endif %}
                     </div>
-                    <form method="post" action="{% url 'admin_remover_matricula' turma.tru_id aluno.usu_id %}" class="ml-4">
-                        {% csrf_token %}
-                        <button 
-                            type="submit"
-                            onclick="return confirm('Deseja remover {{ aluno.usu_nome }} desta turma?')"
-                            class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-md hover:bg-red-700 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            Remover
-                        </button>
-                    </form>
+                    <button 
+                        data-turma-id="{{ turma.tru_id }}"
+                        data-aluno-id="{{ aluno.usu_id }}"
+                        data-aluno-nome="{{ aluno.usu_nome }}"
+                        onclick="confirmarRemoverAluno(this)"
+                        class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-md hover:bg-red-700 transition-colors duration-200">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Remover
+                    </button>
                 </li>
                 {% endfor %}
             </ul>
@@ -242,5 +241,36 @@
         </div>
     </div>
 </div>
+
+<form id="form-remover-aluno" method="post" style="display: none;">
+    {% csrf_token %}
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmarRemoverAluno(button) {
+    const turmaId = button.getAttribute('data-turma-id');
+    const alunoId = button.getAttribute('data-aluno-id');
+    const alunoNome = button.getAttribute('data-aluno-nome');
+    
+    Swal.fire({
+        title: 'Tem certeza?',
+        text: 'Deseja remover o aluno "' + alunoNome + '" desta turma?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sim, remover!',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const form = document.getElementById('form-remover-aluno');
+            form.action = '/turmas/' + turmaId + '/aluno/' + alunoId + '/remover/';
+            form.submit();
+        }
+    });
+}
+</script>
 {% endblock %}
 
