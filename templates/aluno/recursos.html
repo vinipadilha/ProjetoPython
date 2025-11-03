@@ -100,11 +100,13 @@
         {% else %}
         <!-- Outros tipos de recurso -->
         <div class="pt-4 border-t border-gray-200">
+            {% if recurso.rec_arquivo_path %}
             <a href="{{ recurso.rec_arquivo_path }}" 
-               target="_blank"
+               {% if not recurso.rec_arquivo_path|slice:':4' == 'http' %}target="_blank"{% endif %}
                class="block w-full text-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors duration-200">
                 Acessar Recurso
             </a>
+            {% endif %}
         </div>
         {% endif %}
     </div>

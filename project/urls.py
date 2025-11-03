@@ -18,3 +18,7 @@ urlpatterns = [
     path('', include('apps.accounts.urls.web')),  # Dashboard e pos-login (sem prefixo)
     path('api/', include('apps.accounts.urls.api')),
 ]
+
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
