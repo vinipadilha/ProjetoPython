@@ -2,9 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.utils import timezone
+from django.db import connection
 from apps.trainings.models import Treinamento, Turma
+from apps.accounts.models import Usuario
+from apps.enrollments.models import Matricula
+from apps.resourcesapp.models import Recurso
 from apps.accounts.services.current_user import get_usuario_from_request
-from apps.accounts.roles import ROLE_ADMIN
+from apps.accounts.roles import ROLE_ADMIN, ROLE_STUDENT
 
 def is_admin(user):
     # Verifica se é uma instância de Usuario do nosso modelo customizado
@@ -174,4 +178,78 @@ def excluir_turma(request, tru_id):
         return redirect('admin_turmas_listar')
     
     return redirect('admin_turmas_listar')
+
+@login_required
+def dashboard_turma(request, tru_id):
+    """Dashboard da turma mostrando alunos matriculados e recursos"""
+    usuario = get_usuario_from_request(request)
+    if not usuario or usuario.perfil_id != ROLE_ADMIN:
+        return redirect('/aluno/turmas/')
+    
+    turma = get_object_or_404(Turma.objects.select_related('treinamento'), pk=tru_id)
+    
+    # Alunos matriculados nesta turma
+    alunos_matriculados = Usuario.objects.filter(
+        matriculas__turma_id=tru_id
+    ).select_related('perfil').order_by('usu_nome')
+    
+    # Todos os alunos (para o select de adicionar)
+    todos_alunos = Usuario.objects.filter(
+        perfil_id=ROLE_STUDENT
+    ).exclude(
+        matriculas__turma_id=tru_id
+    ).order_by('usu_nome')
+    
+    # Recursos da turma
+    recursos = Recurso.objects.filter(turma_id=tru_id).order_by('rec_nome')
+    
+    # Processar adição de aluno
+    if request.method == 'POST' and 'adicionar_aluno' in request.POST:
+        aluno_id = request.POST.get('aluno_id')
+        if aluno_id:
+            try:
+                aluno = get_object_or_404(Usuario, pk=aluno_id, perfil_id=ROLE_STUDENT)
+                # Verifica se já está matriculado
+                if not Matricula.objects.filter(turma_id=tru_id, usuario_id=aluno_id).exists():
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            INSERT INTO matricula (matTruId, matUsuId, matCadastradoEm)
+                            VALUES (%s, %s, %s)
+                        """, [tru_id, aluno_id, timezone.now()])
+                    messages.success(request, f'Aluno {aluno.usu_nome} matriculado com sucesso!')
+                    return redirect('admin_turma_dashboard', tru_id=tru_id)
+                else:
+                    messages.error(request, 'Este aluno já está matriculado nesta turma.')
+            except Exception as e:
+                messages.error(request, f'Erro ao matricular aluno: {str(e)}')
+    
+    return render(request, 'admin/turmas/dashboard.html', {
+        'turma': turma,
+        'alunos_matriculados': alunos_matriculados,
+        'todos_alunos': todos_alunos,
+        'recursos': recursos
+    })
+
+@login_required
+def remover_matricula(request, tru_id, usu_id):
+    """Remove um aluno de uma turma"""
+    usuario = get_usuario_from_request(request)
+    if not usuario or usuario.perfil_id != ROLE_ADMIN:
+        return redirect('/aluno/turmas/')
+    
+    turma = get_object_or_404(Turma, pk=tru_id)
+    aluno = get_object_or_404(Usuario, pk=usu_id)
+    
+    if request.method == 'POST':
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    DELETE FROM matricula 
+                    WHERE matTruId = %s AND matUsuId = %s
+                """, [tru_id, usu_id])
+            messages.success(request, f'Aluno {aluno.usu_nome} removido da turma com sucesso!')
+        except Exception as e:
+            messages.error(request, f'Erro ao remover aluno: {str(e)}')
+    
+    return redirect('admin_turma_dashboard', tru_id=tru_id)
 
