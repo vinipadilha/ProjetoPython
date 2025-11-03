@@ -27,6 +27,44 @@ A **Plataforma de Treinamentos** é uma aplicação Django que permite:
 - Dashboard administrativo com estatísticas
 - Área restrita por perfil (Admin/Estudante)
 
+## Screenshots
+
+As capturas de tela do sistema estão disponíveis na pasta `screenshots/`:
+
+### Autenticação
+
+![Login](./screenshots/login.png)
+*Tela de login do sistema - Autenticação por email e senha*
+
+### Área Administrativa
+
+![Dashboard Admin](./screenshots/dashboard.png)
+*Dashboard administrativo com estatísticas gerais (treinamentos, turmas, usuários, matrículas)*
+
+![Listagem de Treinamentos](./screenshots/treinamentos.png)
+*CRUD de treinamentos - Listagem, criação, edição e exclusão*
+
+![Listagem de Turmas - Admin](./screenshots/turmas.png)
+*CRUD de turmas na área administrativa - Gerenciamento completo de turmas*
+
+![Dashboard de Turma](./screenshots/dashboardturma.png)
+*Dashboard detalhado de uma turma - Visualização de alunos matriculados e recursos, com opções de adicionar/remover alunos*
+
+![Recursos da Turma - Admin](./screenshots/recursosturma.png)
+*Gerenciamento de recursos da turma - Listagem em cards com opções de criar, editar e excluir*
+
+![Listagem de Alunos](./screenshots/alunos.png)
+*CRUD de usuários/alunos - Listagem com informações de perfil e turmas matriculadas*
+
+### Área do Estudante
+
+![Listagem de Turmas - Estudante](./screenshots/turmasaluno.png)
+*Listagem de turmas do estudante - Visualização apenas das turmas em que está matriculado*
+
+![Recursos do Estudante](./screenshots/recursosaluno.png)
+*Visualização de recursos pelo estudante - Player de vídeo HTML5 e opções de download*
+
+
 ## Requisitos
 
 ### Versões Mínimas
@@ -205,23 +243,7 @@ DATABASES = {
 
 ### Configuração Direta
 
-Atualmente, as configurações estão diretamente no `project/settings.py`. Para maior segurança em produção, recomenda-se usar variáveis de ambiente.
-
-### Exemplo de uso com variáveis (opcional)
-
-Crie um arquivo `.env` na raiz do projeto:
-
-```env
-SECRET_KEY=sua_chave_secreta_aqui
-DB_NAME=plataformatreinamentos
-DB_USER=root
-DB_PASSWORD=sua_senha
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DEBUG=True
-```
-
-E ajuste `settings.py` para ler essas variáveis usando `python-decouple` ou `django-environ`.
+Atualmente, as configurações estão diretamente no `project/settings.py`. Porém é somente para o teste técnico. Para maior segurança em produção, recomenda-se usar variáveis de ambiente.
 
 ## Migrações e Superusuário
 
@@ -397,43 +419,6 @@ Os testes automatizados cobrem:
    - `/treinamentos/` → Deve redirecionar para `/aluno/turmas/`
    - `/turmas/{id}/dashboard/` → Deve redirecionar para `/aluno/turmas/`
 
-## Screenshots
-
-As capturas de tela do sistema estão disponíveis na pasta `screenshots/`:
-
-### Autenticação
-
-![Login](./screenshots/login.png)
-*Tela de login do sistema - Autenticação por email e senha*
-
-### Área Administrativa
-
-![Dashboard Admin](./screenshots/dashboard.png)
-*Dashboard administrativo com estatísticas gerais (treinamentos, turmas, usuários, matrículas)*
-
-![Listagem de Treinamentos](./screenshots/treinamentos.png)
-*CRUD de treinamentos - Listagem, criação, edição e exclusão*
-
-![Listagem de Turmas - Admin](./screenshots/turmas.png)
-*CRUD de turmas na área administrativa - Gerenciamento completo de turmas*
-
-![Dashboard de Turma](./screenshots/dashboardturma.png)
-*Dashboard detalhado de uma turma - Visualização de alunos matriculados e recursos, com opções de adicionar/remover alunos*
-
-![Recursos da Turma - Admin](./screenshots/recursosturma.png)
-*Gerenciamento de recursos da turma - Listagem em cards com opções de criar, editar e excluir*
-
-![Listagem de Alunos](./screenshots/alunos.png)
-*CRUD de usuários/alunos - Listagem com informações de perfil e turmas matriculadas*
-
-### Área do Estudante
-
-![Listagem de Turmas - Estudante](./screenshots/turmasaluno.png)
-*Listagem de turmas do estudante - Visualização apenas das turmas em que está matriculado*
-
-![Recursos do Estudante](./screenshots/recursosaluno.png)
-*Visualização de recursos pelo estudante - Player de vídeo HTML5 e opções de download*
-
 ## Troubleshooting
 
 ### Erro: `Access denied for user 'root'@'localhost'`
@@ -559,16 +544,4 @@ As capturas de tela do sistema estão disponíveis na pasta `screenshots/`:
 - Autenticação customizada via `EmailBackend`
 - Context processors para expor dados globais nos templates
 - Services para lógica de negócio (ex: `access_rules.py`)
-
-## Contribuição
-
-Este é um projeto de avaliação. Para sugestões ou melhorias, consulte a documentação do projeto.
-
-## Licença
-
-Este projeto é de uso educacional e avaliativo.
-
----
-
-**Desenvolvido com Django** | Versão do Projeto: 1.0.0
 
