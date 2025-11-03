@@ -15,13 +15,13 @@
         <nav class="flex-1 p-4 space-y-1">
             {% if usuario and usuario.is_admin %}
             {% with current_path=request.path %}
-            <a href="{% url 'dashboard' %}" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if '/dashboard/' in current_path %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+            <a href="{% url 'dashboard' %}" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if current_path == '/dashboard/' or current_path == '/dashboard' %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                 Dashboard
             </a>
             <a href="{% url 'admin_treinamentos_listar' %}" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if '/treinamentos/' in current_path %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                 Treinamentos
             </a>
-            <a href="{% url 'admin_turmas_listar' %}" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if '/turmas/' in current_path %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+            <a href="{% url 'admin_turmas_listar' %}" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if '/turmas/' in current_path and current_path != '/dashboard/' and current_path != '/dashboard' %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                 Turmas
             </a>
             <a href="{% url 'admin_usuarios_listar' %}" class="block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 {% if '/usuarios/' in current_path %}bg-blue-100 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
