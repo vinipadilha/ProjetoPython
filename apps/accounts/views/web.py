@@ -47,7 +47,9 @@ def listar_usuarios(request):
     if not usuario or usuario.perfil_id != ROLE_ADMIN:
         return redirect('/aluno/turmas/')
     
-    usuarios = Usuario.objects.select_related('perfil').all().order_by('usu_nome')
+    usuarios = Usuario.objects.select_related('perfil').prefetch_related(
+        'matriculas__turma__treinamento'
+    ).all().order_by('usu_nome')
     
     return render(request, 'admin/usuarios/listar.html', {
         'usuarios': usuarios

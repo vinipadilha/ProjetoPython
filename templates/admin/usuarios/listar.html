@@ -55,6 +55,9 @@
                     Telefone
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Turmas Matriculadas
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Cadastrado em
                 </th>
                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -86,6 +89,25 @@
                         <span class="text-gray-400">-</span>
                     {% endif %}
                 </td>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                    {% if usuario.perfil.pef_id == 2 %}
+                        {% with matriculas=usuario.matriculas.all %}
+                            {% if matriculas %}
+                                <div class="flex flex-wrap gap-2">
+                                    {% for matricula in matriculas %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800" title="{{ matricula.turma.treinamento.tre_nome }}">
+                                        {{ matricula.turma.tru_nome }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span class="text-gray-400">Nenhuma turma</span>
+                            {% endif %}
+                        {% endwith %}
+                    {% else %}
+                        <span class="text-gray-400">-</span>
+                    {% endif %}
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {{ usuario.usu_cadastrado_em|date:"d/m/Y H:i" }}
                 </td>
@@ -111,7 +133,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="px-6 py-12 text-center">
+                <td colspan="8" class="px-6 py-12 text-center">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
